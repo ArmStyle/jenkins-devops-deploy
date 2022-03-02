@@ -2,11 +2,11 @@
 pipeline{
 
 	 environment {
-    	registry = "tongzahub/eks-jenkins-demo"
-    	registryCredential = 'docker-user-pass'
+    	registry = "siriwut/eks-jenkins-demo"
+    	registryCredential = 'dockerhub-siriwut'
     	dockerImage = ''
 		region = "ap-southeast-1"
-		clusterName  = "arthit-devops-labs"
+		clusterName  = "arm-devops-labs"
   	}
 
 	agent any
@@ -14,31 +14,31 @@ pipeline{
 	stages {
 
 
-		// stage('Build') {
-		// 	steps {
-		// 	script {
-        //  		 dockerImage = docker.build registry + ":$BUILD_NUMBER"
-       	// 	 }   
-		// 	}
-		// }
+		stage('Build') {
+			steps {
+			script {
+         		 dockerImage = docker.build registry + ":$BUILD_NUMBER"
+       		 }   
+			}
+		}
   
 
-		// stage('Push image') {
-		// 	steps {
-		// 		 script {
-        //     		docker.withRegistry( '', registryCredential ) {
-        //    			dockerImage.push()
-        //  		 }
-		// 	}
-		// }
+		stage('Push image') {
+			steps {
+				 script {
+            		docker.withRegistry( '', registryCredential ) {
+           			dockerImage.push()
+         		 }
+			}
+		}
 
-		// }
+		}
         
-		// stage('Remove Unused docker image') {
-     	// 	 steps{
-        // 		sh "docker rmi $registry:$BUILD_NUMBER"
-     	//  	}
-   		// }
+		stage('Remove Unused docker image') {
+     		 steps{
+        		sh "docker rmi $registry:$BUILD_NUMBER"
+     	 	}
+   		}
 
 		stage('aws creadentials'){
 			  steps {
