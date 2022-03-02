@@ -12,64 +12,54 @@ pipeline{
 	agent any
 	
 	stages {
-
-
 		stage('Build') {
 			steps {
-			script {
-         		 dockerImage = docker.build registry + ":$BUILD_NUMBER"
-       		 }   
+				script {
+					dockerImage = docker.build registry + ":$BUILD_NUMBER"
+				}   
 			}
 		}
   
 
 		stage('Push image') {
 			steps {
-				 script {
+				script {
             		docker.withRegistry( '', registryCredential ) {
-           			dockerImage.push()
-         		 }
+						dockerImage.push()
+					}
+				}
 			}
-		}
-
 		}
         
 		stage('Remove Unused docker image') {
-     		 steps{
+     		steps{
         		sh "docker rmi $registry:$BUILD_NUMBER"
      	 	}
    		}
 
 		stage('aws creadentials'){
-			  steps {
-			  
-			//   withCredentials([[
-   			// 		$class: 'AmazonWebServicesCredentialsBinding',
-   			// 		credentialsId: "eks-credentials",
-   			// 		accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-   			// 		secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-			// 	]]) {
-   			// 		 // AWS Code
-			// 	}
-			  withAWS(credentials: 'eks-credentials', region: 'ap-southeast-1') {
-
-
-				  sh "aws iam list-account-aliases"
-				  sh "aws eks --region $region update-kubeconfig --name $clusterName"
-
-				//   sh "cp /var/lib/jenkins/.kube/config  /home/ubuntu/.kube/config"
-
-				  sh 'kubectl get pods'
-				   sh 'kubectl get nodes'
-				  
-			  }
-
-			  }
-
+			steps {
+				
+				//   withCredentials([[
+				// 		$class: 'AmazonWebServicesCredentialsBinding',
+				// 		credentialsId: "eks-credentials",
+				// 		accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+				// 		secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+				// 	]]) {
+				// 		 // AWS Code
+				// 	}
+				withAWS(credentials: 'aws-arm', region: 'ap-southeast-1') {
+					sh "aws iam list-account-aliases"
+					sh "aws eks --region $region update-kubeconfig --name $clusterName"
+					//  sh "cp /var/lib/jenkins/.kube/config  /home/ubuntu/.kube/config"
+					sh 'kubectl get pods'
+					sh 'kubectl get nodes'
+					
+				}
+			}
 		}
 
         stage('eks deploy') {
-
 			steps {
 				sh 'echo Hello World'
 				sh 'kubectl get pods'
