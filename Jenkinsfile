@@ -2,11 +2,12 @@
 pipeline{
 
 	 environment {
-    	registry = "siriwut/eks-jenkins-demo"
-    	registryCredential = 'dockerhub-siriwut'
+    	registry = "siriwut/eks-jenkins-demo" // repo docker hub
+    	registryCredential = 'dockerhub-siriwut' // id ของ user name password ที่สร้างขึ้นมา
     	dockerImage = ''
 		region = "ap-southeast-1"
-		clusterName  = "arm-devops-labs"
+		clusterName  = "arm-devops-labs" // ชื่อ cluster ใน aws eks
+		eksProfile = "aws-arm" // ใช้ชื่อที่ตั้งใน jenkins
   	}
 
 	agent any
@@ -37,37 +38,37 @@ pipeline{
      	 	}
    		}
 
-		stage('aws creadentials'){
+		stage('Deploy'){
 			steps {
-				
-				//   withCredentials([[
-				// 		$class: 'AmazonWebServicesCredentialsBinding',
-				// 		credentialsId: "eks-credentials",
-				// 		accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-				// 		secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-				// 	]]) {
-				// 		 // AWS Code
-				// 	}
-				withAWS(credentials: 'aws-arm', region: 'ap-southeast-1') {
+				withAWS(credentials: "$eksProfile", region: 'ap-southeast-1') {
 					sh "aws iam list-account-aliases"
 					sh "aws eks --region $region update-kubeconfig --name $clusterName"
-					//  sh "cp /var/lib/jenkins/.kube/config  /home/ubuntu/.kube/config"
 					sh 'kubectl get pods'
 					sh 'kubectl get nodes'
-					
+					sh 'kubectl apply -f eks-deploy-example.yaml'
 				}
 			}
 		}
 
-        stage('eks deploy') {
-			steps {
-				sh 'echo Hello World'
-				sh 'kubectl get pods'
-                // sh "sed -i 's/hellonodejs:latest/hellonodejs:eks/g' deploy.yaml"
-                // sh 'kubectl apply -f deploy.yaml'
-                // sh 'kubectl rollout restart deployment hello-world-nodejs'
-			}
-		}
+		// stage('Deploy') {
+		// 	steps {
+		// 		sh 'echo Hello World'
+		// 		sh 'kubectl get pods'
+        //         // sh "sed -i 's/hellonodejs:latest/hellonodejs:eks/g' deploy.yaml"
+        //         // sh 'kubectl apply -f deploy.yaml'
+        //         // sh 'kubectl rollout restart deployment hello-world-nodejs'
+		// 	}
+		// }
+
+        // stage('eks deploy') {
+		// 	steps {
+		// 		sh 'echo Hello World'
+		// 		sh 'kubectl get pods'
+        //         // sh "sed -i 's/hellonodejs:latest/hellonodejs:eks/g' deploy.yaml"
+        //         // sh 'kubectl apply -f deploy.yaml'
+        //         // sh 'kubectl rollout restart deployment hello-world-nodejs'
+		// 	}
+		// }
 	}
 
 
