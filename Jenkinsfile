@@ -38,14 +38,16 @@ pipeline{
      	 	}
    		}
 
-		stage('Deploy'){
+		stage('Eks deploy'){
 			steps {
-				withAWS(credentials: 'aws-arm', region: 'ap-southeast-1') {
+				withAWS(credentials: "$eksProfile", region: 'ap-southeast-1') {
 					sh "aws iam list-account-aliases"
 					sh "aws eks --region $region update-kubeconfig --name $clusterName"
 					sh 'kubectl get pods'
 					sh 'kubectl get nodes'
+					sh 'echo Hello World'
 					sh 'kubectl apply -f eks-example-deployment.yaml'
+					sh 'kubectl get deployment'
 				}
 			}
 		}
